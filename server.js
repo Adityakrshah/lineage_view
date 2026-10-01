@@ -66,6 +66,16 @@ const server = http.createServer(async (req, res) => {
       const { chains } = load();
       return send(res, 200, { chains: chains.filter((c) => c.project === project) });
     }
+    if (req.method === 'GET' && url.pathname === '/api/export') {
+      const project = url.searchParams.get('project');
+      const { chains, projects, fleet } = load();
+      if (!projects.some((p) => p.id === project)) throw new ValidationError('unknown project');
+      const mine = chains.filter((c) => c.project === project);
+      const all = readTriage(DATA).entries;
+      const triage = Object.fromEntries(Object.entries(all).filter(([k]) => mine.some((c) => k.startsWith(c.key + '|'))));
+      res.writeHead(200, { 'content-type': 'application/json', 'content-disposition': `attachment; filename="lineage-${project}-${fleet.asOf}.json"` });
+      return res.end(JSON.stringify({ project, asOf: fleet.asOf, chains: mine, triage }, null, 2));
+    }
     if (req.method === 'POST' && ['/api/triage', '/api/explain'].includes(url.pathname)) {
       if (!sameOrigin(req) || req.headers['content-type']?.split(';')[0] !== 'application/json') return send(res, 403, { error: 'forbidden', detail: 'same-origin JSON requests only' });
       const b = await body(req);

@@ -181,6 +181,7 @@ function renderChains() {
     h('h2', {}, `${p.name}: ${counts.broken} broken, ${counts.gap} with gaps, ${counts.pending} pending, ${counts.healthy} healthy`),
     h('div', { class: 'row', role: 'group', 'aria-label': 'Filter' }, ['all', 'broken', 'gap', 'pending', 'healthy'].map((f) =>
       h('button', { class: 'chip', 'aria-pressed': String(S.filter === f), onclick: () => { S.filter = f; renderChains(); } }, f === 'all' ? `All (${p.total})` : `${HEALTH[f]} (${counts[f]})`))));
+  head.append(h('a', { class: 'chip', href: '/api/export?project=' + encodeURIComponent(S.proj), download: '' }, 'Export JSON'));
   v.replaceChildren(head);
   if (!list.length) v.append(h('div', { class: 'empty' }, S.chains.length ? 'No chains match this filter.' : 'No signals for this project.'));
   for (const c of list) {
