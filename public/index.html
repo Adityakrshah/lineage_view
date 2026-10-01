@@ -1,272 +1,201 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Lineage View — Visual Control Plane</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://unpkg.com/lucide@latest"></script>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lineage View</title>
+<style>
+:root{--bg:#f5f6f8;--panel:#fff;--ink:#1b1f27;--mut:#667085;--line:#d9dde4;--red:#c4302b;--amb:#a15c00;--blu:#1d5fd1;--grn:#1a7f4b;--rb:#fdecea;--ab:#fff3dc;--bb:#e8f0fe;--gb:#e6f4ec}
+@media(prefers-color-scheme:dark){:root{--bg:#0e1116;--panel:#171b22;--ink:#e6e9ef;--mut:#99a1b0;--line:#2a303b;--red:#ff7b72;--amb:#f0b64a;--blu:#7aa7ff;--grn:#4cc38a;--rb:#2b1618;--ab:#2a2112;--bb:#14203a;--gb:#112619}}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.45 system-ui,sans-serif}
+.app{display:grid;grid-template-columns:270px 1fr;min-height:100vh}
+@media(max-width:800px){.app{grid-template-columns:1fr}}
+aside{background:var(--panel);border-right:1px solid var(--line);padding:16px;display:flex;flex-direction:column;gap:6px}
+h1{font-size:18px;margin:0}.sub{color:var(--mut);font-size:12px;margin-bottom:10px}
+.proj{all:unset;cursor:pointer;display:block;padding:8px 10px;border-radius:8px;border:1px solid transparent}
+.proj:hover{background:var(--bg)}.proj:focus-visible,.chip:focus-visible,button:focus-visible,summary:focus-visible{outline:2px solid var(--blu)}
+.proj[aria-current=true]{border-color:var(--blu);background:var(--bb)}
+.pn{font-weight:600}.pills{display:flex;gap:4px;margin-top:4px;flex-wrap:wrap}
+.pill{font-size:11px;padding:1px 7px;border-radius:99px;font-weight:600}
+.broken{background:var(--rb);color:var(--red)}.gap{background:var(--ab);color:var(--amb)}.pending{background:var(--bb);color:var(--blu)}.healthy{background:var(--gb);color:var(--grn)}
+.legend{margin-top:auto;font-size:12px;color:var(--mut);display:grid;gap:3px}
+main{padding:20px;max-width:980px;width:100%}
+.banner{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:10px 14px;margin-bottom:14px}
+.banner summary{cursor:pointer;font-weight:600}.banner ul{margin:8px 0 0;padding-left:18px;color:var(--mut)}.banner li{margin:3px 0}
+.head{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;margin-bottom:12px}
+.head h2{margin:0;font-size:16px;font-weight:600}
+.chip{all:unset;cursor:pointer;padding:4px 10px;border:1px solid var(--line);border-radius:99px;font-size:12px;background:var(--panel)}
+.chip[aria-pressed=true]{border-color:var(--blu);background:var(--bb);color:var(--blu);font-weight:600}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:10px;margin-bottom:10px}
+.card>summary{list-style:none;cursor:pointer;padding:12px 14px;display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between}
+.card>summary::-webkit-details-marker{display:none}
+.t{font-weight:600}.meta{color:var(--mut);font-size:12px}
+.pipe{display:flex;align-items:center;padding:0 14px 12px;flex-wrap:wrap;gap:0}
+.node{font-size:12px;padding:4px 9px;border-radius:8px;border:1.5px solid var(--line);white-space:nowrap}
+.node.ok{border-color:var(--grn);color:var(--grn);background:var(--gb)}
+.node.error{border-color:var(--red);color:var(--red);background:var(--rb);font-weight:600}
+.node.warn,.node.missing{border:1.5px dashed var(--amb);color:var(--amb);background:var(--ab)}
+.node.pending,.node.deferred{border-color:var(--blu);color:var(--blu);background:var(--bb)}
+.node.blocked,.node.na{color:var(--mut);opacity:.6;border-style:dotted}
+.link{width:26px;height:0;border-top:2px solid var(--grn)}
+.link.error{border-top:2px dashed var(--red)}.link.warn,.link.missing{border-top:2px dashed var(--amb)}
+.link.blocked,.link.na,.link.pending,.link.deferred{border-top:2px dotted var(--line)}
+.body{border-top:1px solid var(--line);padding:12px 14px;display:grid;gap:10px}
+.issue{border:1px solid var(--line);border-left:4px solid var(--amb);border-radius:8px;padding:10px}
+.issue.error{border-left-color:var(--red)}.issue .k{font-size:11px;font-weight:700;text-transform:uppercase;color:var(--mut)}
+.ctx{color:var(--mut);font-style:italic;font-size:12px}
+.row{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;align-items:center}
+button.b{font:inherit;font-size:12px;padding:4px 10px;border-radius:7px;border:1px solid var(--line);background:var(--panel);color:var(--ink);cursor:pointer}
+button.b:hover{border-color:var(--blu)}button.b:disabled{opacity:.5;cursor:default}
+input.note{font:inherit;font-size:12px;padding:4px 8px;border:1px solid var(--line);border-radius:7px;background:var(--bg);color:var(--ink);flex:1;min-width:140px}
+.expl{margin-top:8px;padding:8px 10px;border-radius:8px;background:var(--bg);border:1px solid var(--line);font-size:13px}
+.expl ul{margin:4px 0 0;padding-left:18px}.tag{font-size:11px;font-weight:700;color:var(--mut)}
+.err{background:var(--rb);color:var(--red);border:1px solid var(--red);border-radius:10px;padding:12px 14px}
+.empty{color:var(--mut);padding:30px;text-align:center}
+.tri{font-size:12px;color:var(--mut)}
+</style>
 </head>
-<body class="bg-[#090d16] text-gray-100 antialiased h-screen flex overflow-hidden">
-
-  <!-- Sidebar -->
-  <aside class="w-80 bg-[#111827] border-r border-slate-800 flex flex-col shrink-0">
-    <div class="p-5 border-b border-slate-800 flex items-center justify-between">
-      <div class="flex items-center gap-2">
-        <i data-lucide="activity" class="h-6 w-6 text-sky-400"></i>
-        <span class="font-bold text-lg tracking-tight">Lineage View</span>
-      </div>
-      <span class="text-xs px-2 py-0.5 rounded bg-sky-500/10 text-sky-400 font-mono border border-sky-500/20">PRO v4.5</span>
-    </div>
-
-    <!-- Live Telemetry Pulse Badge -->
-    <div class="mx-3 mt-3 p-2.5 bg-slate-900 border border-slate-800 rounded-lg flex items-center justify-between text-xs">
-      <div class="flex items-center gap-2">
-        <span class="relative flex h-2.5 w-2.5">
-          <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-          <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
-        </span>
-        <span class="text-slate-300 font-medium">Telemetry Pulse</span>
-      </div>
-      <span id="pulse-timer" class="font-mono text-[10px] text-slate-400">Syncing...</span>
-    </div>
-
-    <div class="p-3 text-xs font-semibold text-slate-400 uppercase tracking-wider">Projects Workspace</div>
-    
-    <div id="project-list" class="flex-1 overflow-y-auto p-3 space-y-1.5">
-      <!-- Dynamically populated -->
-    </div>
+<body>
+<div class="app">
+  <aside>
+    <h1>Lineage View</h1>
+    <div class="sub">Inbox ledger &middot; <span id="asof">loading…</span></div>
+    <nav id="projects" aria-label="Projects"></nav>
+    <div class="legend" id="legend"></div>
   </aside>
-
-  <!-- Main Content -->
-  <main class="flex-1 flex flex-col overflow-hidden">
-    <header class="px-6 py-4 border-b border-slate-800 bg-[#111827] flex items-center justify-between flex-wrap gap-4">
-      <div>
-        <h1 id="page-title" class="text-lg font-bold text-slate-100 uppercase tracking-wide">Overview</h1>
-        <p class="text-xs text-slate-400">Visual Control Plane & Automated Diagnostic Daemon</p>
-      </div>
-      <div class="flex items-center gap-3">
-        <button onclick="exportAuditReport()" class="flex items-center gap-1.5 px-3 py-1.5 bg-sky-500 hover:bg-sky-400 text-slate-950 font-bold text-xs rounded-lg transition shadow">
-          <i data-lucide="download" class="h-3.5 w-3.5"></i> Export Audit Report
-        </button>
-        <div class="flex bg-slate-900 p-1 rounded-lg border border-slate-700 text-xs">
-          <button onclick="setFilter('all')" id="filter-all" class="px-3 py-1 rounded font-semibold uppercase bg-sky-500 text-slate-950 transition">All</button>
-          <button onclick="setFilter('broken')" id="filter-broken" class="px-3 py-1 rounded font-semibold uppercase text-slate-400 hover:text-slate-200 transition">Broken</button>
-          <button onclick="setFilter('gap')" id="filter-gap" class="px-3 py-1 rounded font-semibold uppercase text-slate-400 hover:text-slate-200 transition">Gap</button>
-          <button onclick="setFilter('ok')" id="filter-ok" class="px-3 py-1 rounded font-semibold uppercase text-slate-400 hover:text-slate-200 transition">Ok</button>
-        </div>
-      </div>
-    </header>
-
-    <div class="flex-1 overflow-y-auto p-6">
-      <div id="chains-container" class="max-w-4xl mx-auto space-y-4">
-        <!-- Chains dynamically rendered here -->
-      </div>
-    </div>
+  <main>
+    <div id="banner"></div>
+    <div id="view"><div class="empty">Loading…</div></div>
   </main>
+</div>
+<script>
+const $ = (s) => document.querySelector(s);
+const h = (tag, attrs = {}, ...kids) => {
+  const e = document.createElement(tag);
+  for (const [k, v] of Object.entries(attrs)) {
+    if (k === 'class') e.className = v;
+    else if (k.startsWith('on')) e.addEventListener(k.slice(2), v);
+    else if (v !== false && v != null) e.setAttribute(k, v);
+  }
+  for (const c of kids.flat()) if (c != null) e.append(c.nodeType ? c : document.createTextNode(String(c)));
+  return e;
+};
+async function api(path, opt) {
+  const r = await fetch(path, opt);
+  let b = {}; try { b = await r.json(); } catch {}
+  if (!r.ok) throw new Error(b.detail || b.error || 'HTTP ' + r.status);
+  return b;
+}
+const S = { ov: null, proj: null, chains: [], filter: 'all', open: new Set(), expl: {}, notes: {} };
+const STAGES = ['signal', 'analysis', 'summary', 'artifact'];
+const ICON = { ok: '✓', error: '✕', warn: '!', missing: '○', pending: '…', deferred: '⏸', blocked: '–', 'n/a': '–' };
+const cls = (s) => (s === 'n/a' ? 'na' : s);
+const HEALTH = { broken: 'Broken', gap: 'Gap', pending: 'Pending', healthy: 'Healthy' };
 
-  <script>
-    let overviewData = null;
-    let currentProjectId = null;
-    let currentFilter = 'all';
-    let chainsData = [];
-    let explanations = {};
-
-    async function init() {
-      await fetchOverview();
-      startPulseTimer();
-      setInterval(fetchOverview, 15000);
-    }
-
-    async function fetchOverview() {
-      try {
-        const res = await fetch('/api/overview');
-        overviewData = await res.json();
-        renderProjects();
-        if (!currentProjectId && overviewData.projects && overviewData.projects.length > 0) {
-          selectProject(overviewData.projects[0].id);
-        }
-      } catch (err) {
-        console.error('Failed to load overview', err);
-      }
-      lucide.createIcons();
-    }
-
-    function startPulseTimer() {
-      setInterval(() => {
-        const d = new Date();
-        document.getElementById('pulse-timer').innerText = d.toLocaleTimeString();
-      }, 1000);
-    }
-
-    function renderProjects() {
-      const container = document.getElementById('project-list');
-      if (!overviewData || !overviewData.projects) return;
-      container.innerHTML = overviewData.projects.map(p => `
-        <button onclick="selectProject('${p.id}')" class="w-full text-left px-3 py-2.5 rounded-lg text-sm font-medium flex items-center justify-between transition ${currentProjectId === p.id ? 'bg-sky-500/15 text-sky-400 border border-sky-500/30' : 'text-slate-400 hover:bg-slate-800/60 hover:text-slate-200'}">
-          <span class="font-mono">${p.id}</span>
-          ${p.brokenCount > 0 ? `<span class="px-2 py-0.5 rounded-full text-xs font-bold bg-rose-500/20 text-rose-400 border border-rose-500/30">${p.brokenCount}</span>` : ''}
-        </button>
-      `).join('');
-    }
-
-    async function selectProject(projectId) {
-      currentProjectId = projectId;
-      document.getElementById('page-title').innerText = `${projectId} Pipeline`;
-      renderProjects();
-      try {
-        const res = await fetch(`/api/chains?project=${projectId}`);
-        const data = await res.json();
-        chainsData = data.chains || [];
-        renderChains();
-      } catch (err) {
-        console.error('Failed to load chains', err);
-      }
-    }
-
-    function setFilter(filter) {
-      currentFilter = filter;
-      ['all', 'broken', 'gap', 'ok'].forEach(f => {
-        const btn = document.getElementById(`filter-${f}`);
-        if (btn) {
-          btn.className = f === filter ? "px-3 py-1 rounded font-semibold uppercase bg-sky-500 text-slate-950 transition" : "px-3 py-1 rounded font-semibold uppercase text-slate-400 hover:text-slate-200 transition";
-        }
-      });
-      renderChains();
-    }
-
-    async function explainIssue(key, kind, message) {
-      const cacheKey = `${key}-${kind}`;
-      if (explanations[cacheKey]?.data) return;
-
-      explanations[cacheKey] = { loading: true };
-      renderChains();
-
-      try {
-        const res = await fetch('/api/explain', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ key, kind, message })
-        });
-        const data = await res.json();
-        explanations[cacheKey] = { loading: false, data };
-      } catch (err) {
-        explanations[cacheKey] = { loading: false, error: 'Failed to fetch explanation' };
-      }
-      renderChains();
-    }
-
-    function renderChains() {
-      const container = document.getElementById('chains-container');
-      const filtered = chainsData.filter(c => currentFilter === 'all' || c.health === currentFilter);
-
-      if (filtered.length === 0) {
-        container.innerHTML = `<div class="text-center py-16 text-slate-500 text-sm">No pipeline chains match your filter criteria.</div>`;
-        return;
-      }
-
-      container.innerHTML = filtered.map(c => {
-        return `
-          <div class="bg-slate-900/90 border border-slate-800 rounded-xl p-5 shadow-lg space-y-4">
-            <div class="flex items-center justify-between flex-wrap gap-2">
-              <div>
-                <h3 class="font-semibold text-slate-100 text-sm">${c.title}</h3>
-                <span class="text-[11px] text-slate-400 font-mono">Key: ${c.key} • Date: ${c.date}</span>
-              </div>
-              <span class="px-2.5 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider border ${
-                c.health === 'broken' ? 'bg-rose-500/10 text-rose-400 border-rose-500/30' :
-                c.health === 'gap' ? 'bg-amber-500/10 text-amber-400 border-amber-500/30' :
-                'bg-emerald-500/10 text-emerald-400 border-emerald-500/30'
-              }">${c.health}</span>
-            </div>
-
-            <!-- Nodes interactive strip -->
-            <div class="flex items-center gap-2 bg-slate-950/70 p-3 rounded-lg border border-slate-800 text-xs overflow-x-auto">
-              ${Object.entries(c.nodes).map(([nodeName, nodeInfo]) => `
-                <div class="px-3 py-1.5 rounded-md border flex items-center gap-1.5 font-medium uppercase tracking-wide shrink-0 ${
-                  nodeInfo.state === 'ok' ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400' :
-                  nodeInfo.state === 'error' ? 'bg-rose-500/10 border-rose-500/30 text-rose-400' : 'bg-slate-950 border-slate-800 text-slate-500'
-                }">
-                  <i data-lucide="${nodeInfo.state === 'ok' ? 'check-circle-2' : nodeInfo.state === 'error' ? 'x-circle' : 'minus-circle'}" class="h-3.5 w-3.5"></i>
-                  ${nodeName} (${nodeInfo.state})
-                </div>
-              `).join('')}
-            </div>
-
-            <!-- Issues & AI Diagnosis Trigger -->
-            ${c.issues ? c.issues.map(i => {
-              const cacheKey = `${c.key}-${i.kind}`;
-              const exp = explanations[cacheKey];
-
-              return `
-                <div class="bg-rose-950/20 border border-rose-500/30 rounded-lg p-4 text-xs space-y-3">
-                  <div class="flex items-center justify-between flex-wrap gap-2">
-                    <span class="font-semibold text-rose-300 flex items-center gap-2">
-                      <i data-lucide="shield-alert" class="h-4 w-4 text-rose-400 shrink-0"></i>
-                      [${i.severity.toUpperCase()}]${i.message}
-                    </span>
-                    <button onclick="explainIssue('${c.key}', '${i.kind}', '${i.message}')" 
-                      class="px-3.5 py-1.5 bg-sky-500 hover:bg-sky-400 text-slate-950 font-bold rounded-lg transition shadow">
-                      ${exp?.loading ? 'Analyzing with AI...' : '✨ Explain with AI'}
-                    </button>
-                  </div>
-
-                  ${exp?.data ? `
-                    <div class="bg-slate-950 border border-slate-800 p-4 rounded-lg space-y-3 text-slate-300 mt-2">
-                      <div class="font-bold text-sky-400 flex items-center gap-2 border-b border-slate-800 pb-2">
-                        <i data-lucide="cpu" class="h-4 w-4"></i> Automated AI Diagnostic Report (${exp.data.source})
-                      </div>
-                      
-                      <!-- What Happened Section -->
-                      <div class="space-y-1 bg-slate-900/60 p-3 rounded border border-slate-800/80">
-                        <div class="font-semibold text-rose-400 flex items-center gap-1.5 uppercase tracking-wider text-[10px]">
-                          <i data-lucide="alert-triangle" class="h-3.5 w-3.5"></i> What Happened
-                        </div>
-                        <p class="text-slate-200 text-xs"><strong>Incident:</strong> ${exp.data.what}</p>
-                        <p class="text-slate-400 text-xs"><strong>Root Cause:</strong> ${exp.data.likelyCause}</p>
-                      </div>
-
-                      <!-- How to Fix It Section -->
-                      <div class="space-y-1 bg-emerald-950/20 p-3 rounded border border-emerald-500/20">
-                        <div class="font-semibold text-emerald-400 flex items-center gap-1.5 uppercase tracking-wider text-[10px]">
-                          <i data-lucide="wrench" class="h-3.5 w-3.5"></i> How to Fix It
-                        </div>
-                        <p class="text-slate-300 text-xs"><strong>Assigned Owner:</strong> <span class="font-mono text-emerald-300">${exp.data.owner}</span></p>
-                        <div class="text-slate-300 text-xs mt-1">
-                          <strong>Remediation Steps:</strong>
-                          <ul class="list-disc pl-4 mt-1 space-y-0.5 text-slate-300">
-                            ${exp.data.fixSteps.map(step => `<li>${step}</li>`).join('')}
-                          </ul>
-                        </div>
-                      </div>
-                    </div>
-                  ` : ''}
-                </div>
-              `;
-            }).join('') : ''}
-          </div>
-        `;
-      }).join('');
-      lucide.createIcons();
-    }
-
-    function exportAuditReport() {
-      const report = {
-        timestamp: new Date().toISOString(),
-        project: currentProjectId,
-        fleetOverview: overviewData,
-        chains: chainsData
-      };
-      const blob = new Blob([JSON.stringify(report, null, 2)], { type: 'application/json' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `lineage-audit-${currentProjectId || 'fleet'}-${Date.now()}.json`;
-      a.click();
-      URL.revokeObjectURL(url);
-    }
-
-    init();
-  </script>
+function pills(c) {
+  return h('div', { class: 'pills' }, ['broken', 'gap', 'pending', 'healthy'].filter((k) => c[k]).map((k) => h('span', { class: 'pill ' + k, title: HEALTH[k] }, `${c[k]} ${HEALTH[k].toLowerCase()}`)));
+}
+function renderProjects() {
+  const nav = $('#projects'); nav.replaceChildren();
+  for (const p of S.ov.projects) {
+    nav.append(h('button', { class: 'proj', 'aria-current': String(p.id === S.proj), onclick: () => selectProject(p.id) },
+      h('div', { class: 'pn' }, p.name, ' ', h('span', { class: 'meta' }, `(${p.total})`)), pills(p.counts)));
+  }
+  $('#legend').replaceChildren(
+    h('div', {}, h('b', { class: 'pill broken' }, 'Broken'), ' a link is provably wrong'),
+    h('div', {}, h('b', { class: 'pill gap' }, 'Gap'), ' a stage is missing or stalled'),
+    h('div', {}, h('b', { class: 'pill pending' }, 'Pending'), ' waiting, not a fault'),
+    h('div', {}, h('b', { class: 'pill healthy' }, 'Healthy'), ' fully written back'));
+}
+function renderBanner() {
+  const f = S.ov.fleet, items = [];
+  for (const s of f.systemic) items.push(`${s.count} of ${s.of} ${s.kind === 'summary_missing' ? 'analyzed chains have no summary' : 'summarised chains have no written-back artifact'}. That is probably a data-source/export problem, not ${s.count} separate failures.`);
+  for (const w of f.feedWindows) items.push(`The ${w.feed} feed saw no files for ${w.runs} runs (${w.from} to ${w.to}); its newest file was ${w.maxLagDays} days old.`);
+  for (const r of f.failedRuns) items.push(`Ingest run ${r.run} failed on ${r.day}: ${r.error}.`);
+  for (const d of f.droppedHints) items.push(`Routing hint "${d.match}" points at "${d.project}", which is not a project${d.suggestion ? ` (did you mean "${d.suggestion}"?)` : ''}; it is dropped silently.${d.wouldRoute != null ? ` Right now it would have routed ${d.wouldRoute} unsorted signals.` : ''}`);
+  if (f.unverifiableRefs) items.push(`${f.unverifiableRefs} analysis references cannot be verified: the run log has no records for those runs.`);
+  for (const w of f.warnings || []) items.push(w);
+  $('#banner').replaceChildren(items.length ? h('details', { class: 'banner', open: true }, h('summary', {}, `${items.length} things affecting many chains`), h('ul', {}, items.map((i) => h('li', {}, i)))) : '');
+}
+function pipeline(c) {
+  const row = h('div', { class: 'pipe', role: 'img', 'aria-label': 'Chain: ' + STAGES.map((s) => `${s} ${c.nodes[s].state}`).join(', ') });
+  STAGES.forEach((s, i) => {
+    const n = c.nodes[s], st = cls(n.state);
+    if (i) row.append(h('span', { class: 'link ' + st }));
+    row.append(h('span', { class: 'node ' + st }, `${ICON[n.state] || '?'} ${s[0].toUpperCase() + s.slice(1)} · ${n.state}`));
+  });
+  return row;
+}
+function issueBlock(c, i) {
+  const id = `${c.key}|${i.kind}`, tri = S.ov.triage[id], ex = S.expl[id];
+  const note = h('input', { class: 'note', placeholder: 'Note (required for "won\'t fix")', maxlength: 500, value: S.notes[id] || '', oninput: (e) => (S.notes[id] = e.target.value), 'aria-label': 'Triage note' });
+  const act = (action) => h('button', { class: 'b', onclick: () => triage(c, i, action, S.notes[id] || '') }, { acknowledged: 'Acknowledge', wont_fix: "Won't fix", reopened: 'Reopen' }[action]);
+  return h('div', { class: 'issue ' + i.severity },
+    h('div', { class: 'k' }, `${i.severity} · ${i.kind.replace(/_/g, ' ')} · at ${i.at}`),
+    h('div', {}, i.message),
+    ...c.context.map((t) => h('div', { class: 'ctx' }, t)),
+    h('div', { class: 'row' }, h('button', { class: 'b', onclick: () => explain(c, i) }, ex === 'loading' ? 'Explaining…' : 'Explain'), act('acknowledged'), act('wont_fix'), act('reopened'), note),
+    tri ? h('div', { class: 'tri' }, `Triage: ${tri.action.replace('_', ' ')}${tri.note ? ' — ' + tri.note : ''} (${tri.at.slice(0, 16).replace('T', ' ')}, ${tri.history.length} change${tri.history.length > 1 ? 's' : ''})`) : '',
+    ex && ex !== 'loading' ? (ex.error ? h('div', { class: 'err' }, ex.error) : h('div', { class: 'expl' },
+      h('div', { class: 'tag' }, ex.source === 'model' ? 'AI-DRAFTED — verify before acting' : 'BUILT-IN EXPLANATION (rule-based, not AI)'),
+      h('div', {}, h('b', {}, 'Likely cause: '), ex.likelyCause), h('div', {}, h('b', {}, 'Who acts: '), ex.owner || 'unknown'),
+      h('ul', {}, ex.fixSteps.map((s) => h('li', {}, s))), ex.note ? h('div', { class: 'ctx' }, ex.note) : '')) : '');
+}
+function renderChains() {
+  const p = S.ov.projects.find((x) => x.id === S.proj), v = $('#view');
+  const counts = p.counts;
+  const order = { broken: 0, gap: 1, pending: 2, healthy: 3 };
+  const list = S.chains.filter((c) => S.filter === 'all' || c.health === S.filter).sort((a, b) => order[a.health] - order[b.health] || a.date.localeCompare(b.date));
+  const head = h('div', { class: 'head' },
+    h('h2', {}, `${p.name}: ${counts.broken} broken, ${counts.gap} with gaps, ${counts.pending} pending, ${counts.healthy} healthy`),
+    h('div', { class: 'row', role: 'group', 'aria-label': 'Filter' }, ['all', 'broken', 'gap', 'pending', 'healthy'].map((f) =>
+      h('button', { class: 'chip', 'aria-pressed': String(S.filter === f), onclick: () => { S.filter = f; renderChains(); } }, f === 'all' ? `All (${p.total})` : `${HEALTH[f]} (${counts[f]})`))));
+  v.replaceChildren(head);
+  if (!list.length) v.append(h('div', { class: 'empty' }, S.chains.length ? 'No chains match this filter.' : 'No signals for this project.'));
+  for (const c of list) {
+    const d = h('details', { class: 'card', ontoggle: (e) => (e.target.open ? S.open.add(c.key) : S.open.delete(c.key)) },
+      h('summary', {}, h('span', {}, h('span', { class: 't' }, c.title), ' ', h('span', { class: 'meta' }, `${c.date} ${c.time}`)), h('span', { class: 'pill ' + c.health }, HEALTH[c.health])),
+      pipeline(c),
+      h('div', { class: 'body' }, c.issues.length ? c.issues.map((i) => issueBlock(c, i)) : h('div', { class: 'meta' }, 'No issues on this chain.')));
+    if (S.open.has(c.key)) d.open = true;
+    v.append(d);
+  }
+}
+async function selectProject(id) {
+  S.proj = id; S.filter = 'all'; renderProjects();
+  $('#view').replaceChildren(h('div', { class: 'empty' }, 'Loading…'));
+  try {
+    S.chains = (await api('/api/chains?project=' + encodeURIComponent(id))).chains;
+    const c = S.ov.projects.find((x) => x.id === id).counts;
+    S.filter = c.broken ? 'broken' : 'all';
+    renderChains();
+  } catch (e) { $('#view').replaceChildren(h('div', { class: 'err' }, 'Could not load chains: ' + e.message)); }
+}
+async function explain(c, i) {
+  const id = `${c.key}|${i.kind}`; S.expl[id] = 'loading'; S.open.add(c.key); renderChains();
+  try { S.expl[id] = await api('/api/explain', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ key: c.key, kind: i.kind }) }); }
+  catch (e) { S.expl[id] = { error: 'Explain failed: ' + e.message }; }
+  renderChains();
+}
+async function triage(c, i, action, note) {
+  const id = `${c.key}|${i.kind}`; S.open.add(c.key);
+  try { S.ov.triage[id] = await api('/api/triage', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ key: c.key, kind: i.kind, action, note }) }); }
+  catch (e) { S.expl[id] = { error: 'Not saved: ' + e.message }; }
+  renderChains();
+}
+(async function init() {
+  try {
+    S.ov = await api('/api/overview');
+    $('#asof').textContent = `data as of ${S.ov.fleet.asOf} · ${S.ov.fleet.signalCount} signals`;
+    renderBanner();
+    const first = S.ov.projects.find((p) => p.counts.broken) || S.ov.projects[0];
+    if (!first) { $('#view').replaceChildren(h('div', { class: 'empty' }, 'The ledger has no projects.')); return; }
+    renderProjects(); selectProject(first.id);
+  } catch (e) {
+    $('#asof').textContent = 'unavailable';
+    $('#view').replaceChildren(h('div', { class: 'err' }, h('b', {}, 'Cannot read the ledger. '), e.message));
+  }
+})();
+</script>
 </body>
 </html>
