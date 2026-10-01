@@ -52,8 +52,8 @@ Lineage View is built around three ideas:
 You need **Node 18 or newer**. Nothing else is installed.
 
 ```bash
-git clone https://github.com/Adityakrshah/lineage-view.git
-cd lineage-view
+git clone https://github.com/Adityakrshah/lineage_view.git
+cd lineage_view
 node server.js
 ```
 
