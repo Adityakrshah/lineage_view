@@ -53,6 +53,30 @@ input.note{font:inherit;font-size:12px;padding:4px 8px;border:1px solid var(--li
 .err{background:var(--rb);color:var(--red);border:1px solid var(--red);border-radius:10px;padding:12px 14px}
 .empty{color:var(--mut);padding:30px;text-align:center}
 .tri{font-size:12px;color:var(--mut)}
+/* responsive v2 */
+main{min-width:0}
+.issue,.card,.banner,.head h2,.t,.meta,.expl,.ctx{overflow-wrap:anywhere}
+@media(max-width:800px){
+  aside{border-right:0;border-bottom:1px solid var(--line);padding:12px;gap:8px}
+  #projects{display:flex;gap:8px;overflow-x:auto;padding-bottom:6px}
+  .proj{flex:0 0 auto;min-width:160px;border:1px solid var(--line)}
+  .legend{display:flex;flex-wrap:wrap;gap:4px 12px}
+  main{padding:12px}
+  .head{align-items:flex-start}
+  .head .row{flex-wrap:nowrap;overflow-x:auto;max-width:100%;padding-bottom:4px}
+  .chip{flex:0 0 auto;padding:8px 12px}
+  .card>summary{padding:10px 12px}
+  .pipe{flex-direction:column;align-items:stretch;padding:0 12px 12px}
+  .node{white-space:normal}
+  .link{width:0;height:14px;margin-left:20px;border-top:0;border-left:2px solid var(--grn)}
+  .link.error{border-top:0;border-left:2px dashed var(--red)}
+  .link.warn,.link.missing{border-top:0;border-left:2px dashed var(--amb)}
+  .link.blocked,.link.na,.link.pending,.link.deferred{border-top:0;border-left:2px dotted var(--line)}
+  .body{padding:10px 12px}
+  button.b{padding:8px 12px}
+  input.note{flex:1 1 100%;padding:8px 10px}
+}
+@media(max-width:480px){h1{font-size:16px}.head h2{font-size:14px}.proj{min-width:140px}}
 </style>
 </head>
 <body>
