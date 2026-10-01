@@ -54,7 +54,7 @@ You need **Node 18 or newer**. Nothing else is installed.
 ```bash
 git clone https://github.com/Adityakrshah/lineage_view.git
 cd lineage_view
-node server.js
+npm start
 ```
 
 Open **http://127.0.0.1:3000**.
